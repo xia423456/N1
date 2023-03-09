@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: cs（n1）03.10
+name: 编译固件
 
 on:
   repository_dispatch:
@@ -49,7 +49,7 @@ jobs:
         echo -e  "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l) \n"
         echo "硬盘详情："
         df -Th
-        
+
     - name: 初始化编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -68,24 +68,24 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
         # 清理多余文件，腾出磁盘空间
-        #docker rmi `docker images -q`
-        #sudo -E apt-get remove -y --purge azure-cli ghc zulu* llvm* firefox google* dotnet* powershell mysql* php* android*
-        #sudo rm -rf /etc/mysql /etc/php /swapfile
-        
+        docker rmi `docker images -q`
+        sudo -E apt-get remove -y --purge azure-cli ghc zulu* llvm* firefox google* dotnet* powershell mysql* php* android*
+        sudo rm -rf /etc/mysql /etc/php /swapfile
+
     - name: 克隆源码
       working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        
+
     - name: 加载自定义feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
-        
+
     - name: 更新feeds
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -99,7 +99,7 @@ jobs:
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
-        
+
     - name: 下载软件包
       id: package
       run: |
@@ -108,7 +108,7 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-        
+
     - name: 编译固件
       id: compile
       run: |
@@ -119,7 +119,7 @@ jobs:
         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
-        
+
     - name: 清理磁盘空间
       if: (!cancelled())
       run: |
@@ -140,7 +140,7 @@ jobs:
         echo -e "\n"
         echo "列出空间占用前10的目录或文件："
         sudo du -h --max-depth=1 /workdir/openwrt |sort -nr | head -10
-        
+
     - name: 打包内核
       uses: unifreq/openwrt_packit@master
       env:
@@ -149,17 +149,17 @@ jobs:
         PACKAGE_SOC: s905d
        # KERNEL_AUTO_LATEST: false
        # KERNEL_REPO_URL: https://github.com/quanjindeng/Actions_OpenWrt-Amlogic/tree/main/kernel
-        KERNEL_VERSION_NAME: 6.1.15
+        KERNEL_VERSION_NAME: 5.15.85_6.1.1
 
     - name: 发布固件
       uses: ncipollo/release-action@v1
       with:
-        tag: openwrt_armvirt_iStore_${{ env.PACKAGED_OUTPUTDATE }}
+        tag: openwrt_armvirt_v8_${{ env.PACKAGED_OUTPUTDATE }}
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         allowUpdates: true
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
-          ### **适用于Amlogic平台的N1盒子OpenWrt固件--精简版（含iStore插件）**
+          ### **适用于Amlogic平台的N1盒子OpenWrt固件--全插件**
           * **固件信息：**
           默认IP: `10.10.10.1`
           默认用户名: `root`
@@ -169,16 +169,12 @@ jobs:
           2. 更新固件：将固件放在 `/mnt/mmcblk2p4/` 目录下，输入命令 `openwrt-update-amlogic` 可直接更新
           3. 登录Luci界面后，可直接使用`晶晨宝盒`插件进行写入emmc或者更新操作（使用前先按需求填写好插件设置），免去手动输入命令！
           * **更新说明：**
-          精简版（含iStore插件）！
+          目前已集成大部分常用插件！
           * **N1云编译OP固件互助交流群：**
           https://t.me/OpenWrt_n1
           * **提示：**
-          建议自行添加iStore的软件源，并在软件源配置里禁用`# option check_signature`，之后刷新一下软件列表
-          自定义软件源：
-          `src/gz is_nas_luci https://istore.linkease.com/repo/all/nas_luci`
-          `src/gz is_store https://istore.linkease.com/repo/all/store`
-          更新频率：`每月一次`
-          
+          `openwrt_s905d_n1_XX_XX` 文件名才是固件！
+
     - name: 清理Actions空间
       uses: Mattraks/delete-workflow-runs@main
       with:
