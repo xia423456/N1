@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: 编译固件
+name: 测试插件(cs)
 
 on:
   repository_dispatch:
