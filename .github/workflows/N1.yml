@@ -8,14 +8,12 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: cs（n1）
+name: cs（n1）03.10
 
 on:
   repository_dispatch:
   workflow_dispatch:
 
-  schedule:
-    - cron: 0 16 15 * *
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
