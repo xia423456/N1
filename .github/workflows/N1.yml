@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: cs 03.10
+name: N1
 
 on:
   repository_dispatch:
