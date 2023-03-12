@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: 测试插件(cs)3 安装广告大师的
+name: 测试插件(cs)3 调整
 
 on:
   repository_dispatch:
@@ -159,7 +159,7 @@ jobs:
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
           ### **适用于Amlogic平台的N1盒子OpenWrt固件--全插件**
-          * **固件信息：**
+          * **调试版：**
           默认IP: `10.10.10.1`
           默认用户名: `root`
           默认密码: `password`
