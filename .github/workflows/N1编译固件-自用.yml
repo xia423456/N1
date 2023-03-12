@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: N1-自用
+name: N1编译固件-自用
 
 on:
   repository_dispatch:
