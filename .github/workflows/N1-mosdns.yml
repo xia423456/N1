@@ -167,6 +167,7 @@ jobs:
           * **使用方法：**
           1. 安装固件：写入U盘直接使用；U盘启动后可输入命令 `openwrt-install-amlogic` 按照英文提示写入到emmc
           2. 更新固件：将固件放在 `/mnt/mmcblk2p4/` 目录下，输入命令 `openwrt-update-amlogic` 可直接更新
+          3. 带luci-app-mosdns
           * **提示：**
           `openwrt_s905d_n1_XX_XX` 文件名才是固件！
 
